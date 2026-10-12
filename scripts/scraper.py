@@ -127,8 +127,49 @@ def ddg_search(query: str, n: int = 5) -> list[tuple[str, str]]:
     return results[:n]
 
 
+def verify_url(url: str) -> bool:
+    """Verify URL returns a valid job page (not 404, not redirect, has content)."""
+    try:
+        headers = {
+            'User-Agent': random.choice(USER_AGENTS),
+            'Accept': 'text/html,application/xhtml+xml',
+        }
+        req = urllib.request.Request(url, headers=headers)
+        response = urllib.request.urlopen(req, context=ssl_ctx, timeout=10)
+        
+        # Check status code
+        if response.status >= 400:
+            return False
+        
+        # Check final URL (catches redirects)
+        final_url = response.geturl()
+        if '404' in final_url.lower() or 'not-found' in final_url.lower():
+            return False
+        
+        # Check content length (very short = probably not a real job page)
+        content = response.read().decode('utf-8', errors='replace')[:5000]
+        if len(content) < 500:
+            return False
+        
+        # Check for common "page not found" indicators
+        if any(text in content.lower() for text in [
+            'page not found', '404 not found', 'job not found',
+            'position not available', 'no longer available'
+        ]):
+            return False
+        
+        return True
+    except:
+        return False
+
+
 def extract_job_details(url: str, title: str = "") -> Optional[dict]:
-    """Fetch job page and extract details."""
+    """Fetch job page, verify it's real, and extract details."""
+    # First verify the URL is valid
+    if not verify_url(url):
+        log(f"    ⚠️  URL verification failed, skipping")
+        return None
+    
     html = fetch(url, timeout=10)
     if not html:
         return None
