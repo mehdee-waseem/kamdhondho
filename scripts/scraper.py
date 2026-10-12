@@ -48,18 +48,23 @@ TARGET_COUNTRIES = [
     'latvia', 'lithuania', 'romania', 'hungary'
 ]
 
-# Search queries
+# Search queries - focused on real platforms and research labs
 SEARCH_QUERIES = [
-    "internship 2027 software engineering europe",
-    "stage PFE 2027 logiciel sécurité IoT",
+    "site:jobteaser.com internship 2027 software engineering",
+    "site:piktalent.com internship software engineering 2027",
+    "site:linkedin.com/jobs internship 2027 software engineering europe",
+    "site:linkedin.com/jobs stage 2027 logiciel sécurité IoT",
+    "site:stepstone.de praktikum 2027 software entwickler",
+    "site:welcometothejungle.com stage 2027 logiciel",
+    "site:inria.fr stage 2027 ingénieur",
+    "site:cnrs.fr stage 2027 ingénieur sécurité",
+    "site:cea.fr stage 2027 ingénieur",
+    "site:fraunhofer.de praktikum 2027 software",
+    "site:cern.ch student internship 2027",
+    "site:eit.europa.eu internship 2027 smart mobility",
+    "internship 2027 IoT security python C++ europe",
     "internship 2027 smart mobility optimization",
-    "internship 2027 IoT security python C++",
-    "praktikum 2027 software entwickler",
-    "internship 2027 urban mobility data analysis",
-    "stage 2027 mobilité intelligente France",
-    "internship 2027 reinforcement learning optimization",
-    "praktikum 2027 IoT embedded systems",
-    "internship 2027 traffic simulation software",
+    "stage PFE 2027 logiciel sécurité France",
 ]
 
 # User-Agent rotation
