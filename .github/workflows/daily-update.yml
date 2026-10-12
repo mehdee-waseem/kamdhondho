@@ -1,0 +1,74 @@
+name: Daily Job Update
+
+on:
+  schedule:
+    # Runs every day at 8:00 AM UTC
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+    inputs:
+      run_type:
+        description: 'Run type (search/update/archive)'
+        required: false
+        default: 'search'
+        type: choice
+        options:
+          - search
+          - update
+          - archive
+
+permissions:
+  contents: write
+
+jobs:
+  scrape-jobs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 lxml
+      
+      - name: Run job scraper
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/scraper.py
+          echo "Scraper completed successfully"
+      
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet public/jobs.json public/archive.json seen_jobs.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No new jobs found"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "New jobs found, committing changes"
+            git diff --stat
+          fi
+      
+      - name: Commit and push changes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add public/jobs.json public/archive.json seen_jobs.json
+          git commit -m "🔄 Daily job update - $(date +'%Y-%m-%d %H:%M UTC')" -m "Found new internship opportunities"
+          git push origin main
+      
+      - name: Notify about no changes
+        if: steps.changes.outputs.changed == 'false'
+        run: |
+          echo "No new jobs found today. Archive remains at $(python -c 'import json; print(json.load(open("public/archive.json")).get("totalInArchive", 0))') jobs"
