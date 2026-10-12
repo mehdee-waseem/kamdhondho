@@ -1,4 +1,4 @@
-import { MapPin, Calendar, ExternalLink, Bookmark, BookmarkCheck, Clock } from 'lucide-react'
+import { MapPin, Calendar, ExternalLink, Bookmark, BookmarkCheck, Clock, AlertTriangle, Star } from 'lucide-react'
 import { Job } from '../types'
 
 interface JobCardProps {
@@ -8,11 +8,25 @@ interface JobCardProps {
 }
 
 export function JobCard({ job, isBookmarked, onToggleBookmark }: JobCardProps) {
+  const isDeadlineApproaching = job.deadline !== 'Rolling' && job.deadline !== '' && (() => {
+    const deadline = new Date(job.deadline)
+    const now = new Date()
+    const daysUntil = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    return daysUntil <= 14 && daysUntil >= 0
+  })()
+
   return (
-    <div className="card p-6 hover:border-primary-300 dark:hover:border-primary-700">
-      <div className="flex items-start justify-between gap-4">
+    <div className="card p-6 hover:border-primary-300 dark:hover:border-primary-700 relative">
+      <div className="absolute top-4 right-4 flex items-center gap-1 bg-primary-50 dark:bg-primary-900/30 px-2 py-1 rounded-full">
+        <Star className="w-3 h-3 text-primary-600 dark:text-primary-400" />
+        <span className="text-xs font-semibold text-primary-700 dark:text-primary-300">
+          {job.matchScore}/10
+        </span>
+      </div>
+
+      <div className="flex items-start justify-between gap-4 pr-12">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1 break-words">
             {job.title}
           </h3>
           <p className="text-sm font-medium text-primary-600 dark:text-primary-400 mb-3">
@@ -32,6 +46,18 @@ export function JobCard({ job, isBookmarked, onToggleBookmark }: JobCardProps) {
               <Clock className="w-4 h-4" />
               {job.duration}
             </div>
+            {job.deadline && job.deadline !== 'Rolling' && (
+              <div className={`flex items-center gap-1 text-sm ${isDeadlineApproaching ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-600 dark:text-gray-400'}`}>
+                <AlertTriangle className="w-4 h-4" />
+                {job.deadline}
+              </div>
+            )}
+            {job.deadline === 'Rolling' && (
+              <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
+                <AlertTriangle className="w-4 h-4" />
+                Rolling
+              </div>
+            )}
           </div>
 
           <div className="mb-4">

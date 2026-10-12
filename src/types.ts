@@ -6,6 +6,7 @@ export interface Job {
   country: string;
   startDate: string;
   duration: string;
+  deadline: string;
   platform: string;
   url: string;
   matchRationale: string;
@@ -13,6 +14,7 @@ export interface Job {
   postedDate: string;
   archived: boolean;
   bookmarked: boolean;
+  matchScore: number;
 }
 
 export interface JobFilters {
